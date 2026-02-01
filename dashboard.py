@@ -97,7 +97,7 @@ if impact_metric not in df.columns:
     impact_metric = "Total Deaths"
 
 min_impact = st.sidebar.number_input(
-    f"Minimum {impact_metric} per event (optional)",
+    f"Minimum {impact_metric} per event",
     min_value=0.0,
     value=0.0,
     step=1.0
@@ -202,38 +202,39 @@ st.divider()
 # -----------------------------
 # Concentration analysis
 # -----------------------------
-st.subheader("Concentration: do a few events dominate total deaths?")
-deaths = f[["DisNo.", "Event Name", "Country", "Disaster Type", "Year", "Total Deaths"]].copy()
-deaths["Total Deaths"] = pd.to_numeric(deaths["Total Deaths"], errors="coerce")
-deaths = deaths.dropna(subset=["Total Deaths"]).sort_values("Total Deaths", ascending=False)
+st.subheader(f"Concentration: do a few events dominate {impact_metric.lower()}?")
+concentration_cols = ["DisNo.", "Event Name", "Country", "Disaster Type", "Year", impact_metric]
+concentration_df = f[[c for c in concentration_cols if c in f.columns]].copy()
+concentration_df[impact_metric] = pd.to_numeric(concentration_df[impact_metric], errors="coerce")
+concentration_df = concentration_df.dropna(subset=[impact_metric]).sort_values(impact_metric, ascending=False)
 
-if len(deaths) == 0:
-    st.info("No reported death values under current filters.")
+if len(concentration_df) == 0:
+    st.info(f"No reported {impact_metric.lower()} values under current filters.")
 else:
-    total = deaths["Total Deaths"].sum()
+    total = concentration_df[impact_metric].sum()
     top_n = st.slider("Top-N events to summarize", min_value=5, max_value=50, value=10, step=5)
-    top = deaths.head(top_n)
-    share = top["Total Deaths"].sum() / total if total else np.nan
-    st.write(f"Top {top_n} events account for **{share:.2%}** of reported deaths (under current filters).")
+    top = concentration_df.head(top_n)
+    share = top[impact_metric].sum() / total if total else np.nan
+    st.write(f"Top {top_n} events account for **{share:.2%}** of reported {impact_metric.lower()} (under current filters).")
 
     left, right = st.columns(2)
 
     with left:
         st.markdown("**Top events (table)**")
-        show_cols = ["DisNo.", "Year", "Country", "Disaster Type", "Event Name", "Total Deaths"]
+        show_cols = ["DisNo.", "Year", "Country", "Disaster Type", "Event Name", impact_metric]
         show_cols = [c for c in show_cols if c in top.columns]
         st.dataframe(top[show_cols], width='stretch')
 
     with right:
         if PLOTLY_OK:
-            fig = px.bar(top[::-1], x="Total Deaths", y="DisNo.", orientation="h",
+            fig = px.bar(top[::-1], x=impact_metric, y="DisNo.", orientation="h",
                          hover_data=[c for c in ["Country","Disaster Type","Year","Event Name"] if c in top.columns])
             fig.update_layout(yaxis_title="Event ID (DisNo.)")
             st.plotly_chart(fig, width='stretch')
         else:
             import matplotlib.pyplot as plt
             fig, ax = plt.subplots()
-            ax.barh(top["DisNo."].astype(str), top["Total Deaths"])
+            ax.barh(top["DisNo."].astype(str), top[impact_metric])
             st.pyplot(fig)
 
 st.caption("Tip: adjust filters to compare hazard profiles and impacts across time windows and regions.")
