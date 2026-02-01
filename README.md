@@ -4,6 +4,11 @@ Exploratory Data Analysis of Global Disaster Impacts using the EM-DAT Internatio
 
 **DSCD 611 Final Project**
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://c4dcsd611.streamlit.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/jlsodai/c4_dcsd611)
+
+**[Live Dashboard](https://c4dcsd611.streamlit.app/)**     |     **[GitHub Repository](https://github.com/jlsodai/c4_dcsd611)**
+
 ## Dataset
 
 | Detail            | Value                                              |
@@ -54,6 +59,10 @@ python main.py
 Saves visualizations to `figures/` folder.
 
 ### Streamlit Dashboard (Interactive Exploration)
+
+**Live:** [https://c4dcsd611.streamlit.app/](https://c4dcsd611.streamlit.app/)
+
+Or run locally:
 ```bash
 streamlit run dashboard.py
 ```
